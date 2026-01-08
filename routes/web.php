@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
+use App\Http\Controllers\Settings\PatientController;
 
 Route::get('/', function () {
     return Inertia::render('welcome', [
@@ -22,6 +23,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/patients/create', function () {
         return Inertia::render('Patients/Create');
     })->name('patients.create');
+
+    Route::post('/patients/create', [PatientController::class, 'create'])
+        ->name('patients.store');
 });
 
 require __DIR__.'/settings.php';
