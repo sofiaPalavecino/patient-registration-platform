@@ -1,15 +1,8 @@
-import InputError from '@/components/input-error';
-import TextLink from '@/components/text-link';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Spinner } from '@/components/ui/spinner';
 import AuthLayout from '@/layouts/auth-layout';
 import { register } from '@/routes';
 import { store } from '@/routes/login';
 import { request } from '@/routes/password';
-import { Form, Head } from '@inertiajs/react';
+import { Form, Head, Link } from '@inertiajs/react';
 
 interface LoginProps {
     status?: string;
@@ -37,9 +30,16 @@ export default function Login({
                 {({ processing, errors }) => (
                     <>
                         <div className="grid gap-6">
+
                             <div className="grid gap-2">
-                                <Label htmlFor="email">Email address</Label>
-                                <Input
+                                <label
+                                    htmlFor="email"
+                                    className="text-sm font-medium"
+                                >
+                                    Email address
+                                </label>
+
+                                <input
                                     id="email"
                                     type="email"
                                     name="email"
@@ -48,24 +48,38 @@ export default function Login({
                                     tabIndex={1}
                                     autoComplete="email"
                                     placeholder="email@example.com"
+                                    className="w-full rounded-md border px-3 py-2 text-sm"
                                 />
-                                <InputError message={errors.email} />
+
+                                {errors.email && (
+                                    <p className="text-sm text-red-600">
+                                        {errors.email}
+                                    </p>
+                                )}
                             </div>
+
 
                             <div className="grid gap-2">
                                 <div className="flex items-center">
-                                    <Label htmlFor="password">Password</Label>
+                                    <label
+                                        htmlFor="password"
+                                        className="text-sm font-medium"
+                                    >
+                                        Password
+                                    </label>
+
                                     {canResetPassword && (
-                                        <TextLink
+                                        <Link
                                             href={request()}
-                                            className="ml-auto text-sm"
+                                            className="ml-auto text-sm underline"
                                             tabIndex={5}
                                         >
                                             Forgot password?
-                                        </TextLink>
+                                        </Link>
                                     )}
                                 </div>
-                                <Input
+
+                                <input
                                     id="password"
                                     type="password"
                                     name="password"
@@ -73,37 +87,53 @@ export default function Login({
                                     tabIndex={2}
                                     autoComplete="current-password"
                                     placeholder="Password"
+                                    className="w-full rounded-md border px-3 py-2 text-sm"
                                 />
-                                <InputError message={errors.password} />
+
+                                {errors.password && (
+                                    <p className="text-sm text-red-600">
+                                        {errors.password}
+                                    </p>
+                                )}
                             </div>
 
-                            <div className="flex items-center space-x-3">
-                                <Checkbox
+                            <div className="flex items-center gap-2">
+                                <input
                                     id="remember"
                                     name="remember"
+                                    type="checkbox"
                                     tabIndex={3}
+                                    className="h-4 w-4"
                                 />
-                                <Label htmlFor="remember">Remember me</Label>
+                                <label
+                                    htmlFor="remember"
+                                    className="text-sm"
+                                >
+                                    Remember me
+                                </label>
                             </div>
 
-                            <Button
+                            <button
                                 type="submit"
-                                className="mt-4 w-full"
                                 tabIndex={4}
                                 disabled={processing}
                                 data-test="login-button"
+                                className="mt-4 w-full rounded-md bg-black px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
                             >
-                                {processing && <Spinner />}
-                                Log in
-                            </Button>
+                                {processing ? 'Logging in…' : 'Log in'}
+                            </button>
                         </div>
 
                         {canRegister && (
                             <div className="text-center text-sm text-muted-foreground">
-                                Don't have an account?{' '}
-                                <TextLink href={register()} tabIndex={5}>
+                                Don&apos;t have an account?{' '}
+                                <Link
+                                    href={register()}
+                                    tabIndex={5}
+                                    className="underline"
+                                >
                                     Sign up
-                                </TextLink>
+                                </Link>
                             </div>
                         )}
                     </>
@@ -111,7 +141,7 @@ export default function Login({
             </Form>
 
             {status && (
-                <div className="mb-4 text-center text-sm font-medium text-green-600">
+                <div className="mt-4 text-center text-sm font-medium text-green-600">
                     {status}
                 </div>
             )}
