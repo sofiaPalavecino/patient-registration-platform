@@ -4,6 +4,8 @@ import { route } from 'ziggy-js';
 import SuccessMessage from '@/components/modal-success-message';
 import ErrorMessage from '@/components/modal-error-message';
 import Modal from '@/components/modal';
+import ErrorField from '@/components/error-field';
+import TextInput from '@/components/text-input';
 
 export default function Create() {
     const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -11,15 +13,27 @@ export default function Create() {
     const [preview, setPreview] = useState<string | null>(null);
     const [modalOpen, setModalOpen] = useState(false);
     const [modalType, setModalType] = useState<'success' | 'error' | null>(null);
+    const [errors, setErrors] = useState<Record<string, string | undefined>>({});
+    const [processing, setProcessing] = useState(false);
+    const [data, setData] = useState(
+        {
+            first_name: '',
+            last_name: '',
+            email: '',
+            country_code: '54',
+            phone: '',
+            document_image: null as File | null,
+        }
+    );
 
-    const { data, setData, post, processing, errors } = useForm({
+    /* const { data, setData, post, processing, errors, clearErrors } = useForm({
         first_name: '',
         last_name: '',
         email: '',
         country_code: '54',
         phone: '',
         document_image: null as File | null,
-    });
+    }); */
 
     function handleFile(file: File) {
         if (!['image/jpeg', 'image/jpg'].includes(file.type)) {
@@ -27,7 +41,7 @@ export default function Create() {
             return;
         }
 
-        setData('document_image', file);
+        setData({ ...data, document_image: file });
         const reader = new FileReader();
         reader.onload = () => setPreview(reader.result as string);
         reader.readAsDataURL(file);
@@ -46,22 +60,66 @@ export default function Create() {
         if (file) handleFile(file);
     }
 
-    function handleSubmit(e: React.FormEvent) {
+    async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
 
-        post(route('patients.store'), {
-            forceFormData: true,
-            onSuccess: () => {
-                setModalType('success');
-            },
-            onError: (errors) => {
-                console.log(errors)
+        setProcessing(true);
+        setModalOpen(false);
+
+        try {
+            const formData = new FormData();
+            Object.entries(data).forEach(([key, value]) => {
+                if (value !== null) formData.append(key, value as any);
+            });
+
+            console.log(formData)
+
+            const response = await fetch('/api/patients', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    Accept: 'application/json',
+                },
+            });
+
+            let resData: any = null;
+            try {
+                resData = await response.json();
+            } catch (jsonErr) {
+                console.error('Failed to parse JSON:', jsonErr);
+            }
+
+            if (!response.ok) {
+                console.log(resData.errors)
+                setErrors(resData.errors || {});
                 setModalType('error');
-            },
-        });
+            } else {
+                setModalType('success');
+                setData({
+                    first_name: '',
+                    last_name: '',
+                    email: '',
+                    phone: '',
+                    country_code: '',
+                    document_image: null,
+                });
+            }
+        } catch (err) {
+            setModalType('error');
+        } finally {
+            setProcessing(false);
+            setModalOpen(true);
+        }
+    }
 
-        setModalOpen(true);
 
+    function handleChange(field: string, value: string | File) {
+        setData({ ...data, [field]: value });
+
+        // Clear the error for this field when typing
+        if (errors[field]) {
+            setErrors((prev) => ({ ...prev, [field]: undefined }));
+        }
     }
 
 
@@ -76,76 +134,78 @@ export default function Create() {
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div>
-                        <label className="mb-1 block text-sm font-medium">
-                            First name
-                        </label>
-                        <input
-                            type="text"
+                        <TextInput
+                            label="First name"
                             name="first_name"
                             value={data.first_name}
-                            onChange={(e) => setData('first_name', e.target.value)}
-                            required
-                            className="w-full rounded border px-3 py-2"
+                            error={errors.first_name}
+                            onChange={(value) => handleChange('first_name', value)}
+                            onFocus={() => setErrors((prev) => ({ ...prev, first_name: undefined }))}
+                            placeholder="John"
                         />
                     </div>
 
                     <div>
-                        <label className="mb-1 block text-sm font-medium">
-                            Last name
-                        </label>
-                        <input
-                            type="text"
+                        <TextInput
+                            label="Last name"
                             name="last_name"
                             value={data.last_name}
-                            onChange={(e) => setData('last_name', e.target.value)}
-                            required
-                            className="w-full rounded border px-3 py-2"
+                            error={errors.last_name}
+                            onChange={(value) => handleChange('last_name', value)}
+                            onFocus={() => setErrors((prev) => ({ ...prev, last_name: undefined }))}
+                            placeholder="Doe"
                         />
                     </div>
 
                     <div>
-                        <label className="mb-1 block text-sm font-medium">
-                            Email address
-                        </label>
-                        <input
-                            type="email"
+                        <TextInput
+                            label="Email"
                             name="email"
                             value={data.email}
-                            onChange={(e) => setData('email', e.target.value)}
-                            required
-                            className="w-full rounded border px-3 py-2"
+                            error={errors.email}
+                            onChange={(value) => handleChange('email', value)}
+                            onFocus={() => setErrors((prev) => ({ ...prev, email: undefined }))}
+                            placeholder="Doe"
                         />
                     </div>
 
-                    <div className="flex gap-2">
-                        <select
-                            name="country_code"
-                            value={data.country_code}
-                            onChange={(e) => setData('country_code', e.target.value)}
-                            className="rounded border px-2 py-2"
-                        >
-                            <option value="1">🇺🇸 +1</option>
-                            <option value="34">🇪🇸 +34</option>
-                            <option value="44">🇬🇧 +44</option>
-                            <option value="49">🇩🇪 +49</option>
-                            <option value="54">🇦🇷 +54</option>
-                            <option value="55">🇧🇷 +55</option>
-                            <option value="57">🇨🇴 +57</option>
-                        </select>
+                    <div className="">
+                        <div className="flex gap-2">
+                            <select
+                                name="country_code"
+                                value={data.country_code}
+                                onChange={(e) => handleChange('country_code', e.target.value)}
+                                onFocus={() => setErrors((prev) => ({ ...prev, country_code: undefined }))}
+                                className={`rounded border px-2 py-2
+                                    ${errors.phone ? 'border-red-500' : 'border-gray-300'}`}
+                            >
+                                <option value="1">🇺🇸 +1</option>
+                                <option value="34">🇪🇸 +34</option>
+                                <option value="44">🇬🇧 +44</option>
+                                <option value="49">🇩🇪 +49</option>
+                                <option value="sdasd">🇦🇷 +54</option>
+                                <option value="55">🇧🇷 +55</option>
+                                <option value="57">🇨🇴 +57</option>
+                            </select>
 
-                        <input
-                            type="tel"
-                            name="phone"
-                            value={data.phone}
-                            onChange={(e) => setData('phone', e.target.value)}
-                            placeholder="11 2345 6789"
-                            className="w-full rounded border px-3 py-2"
-                        />
+                            <input
+                                type="tel"
+                                name="phone"
+                                value={data.phone}
+                                onChange={(e) => handleChange('phone', e.target.value)}
+                                onFocus={() => setErrors((prev) => ({ ...prev, phone: undefined }))}
+                                placeholder="11 2345 6789"
+                                className={`w-full rounded border px-3 py-2 focus:ring-1 focus:ring-blue-500 focus-visible:outline-2
+                                    ${errors.phone ? 'border-red-500' : 'border-gray-300'}`}
+                            />
+                        </div>
+                        <ErrorField message={errors.country_code} />
+                        <ErrorField message={errors.phone} />
                     </div>
 
                     <div>
                         <label className="mb-2 block text-sm font-medium">
-                            Document image
+                            Document image *
                         </label>
 
                         <div
@@ -192,6 +252,7 @@ export default function Create() {
                             name="document_image"
                             onChange={onFileChange}
                         />
+                        <ErrorField message={errors.document_image} />
                     </div>
 
                     <button
