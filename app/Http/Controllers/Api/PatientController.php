@@ -21,11 +21,11 @@ class PatientController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'first_name' => 'required|string|max:255|regex:/^[A-Za-z]+$/',
-            'last_name' => 'required|string|max:255|regex:/^[A-Za-z]+$/',
+            'first_name' => 'required|string|max:255|regex:/^[A-Za-z\s]+$/',
+            'last_name' => 'required|string|max:255|regex:/^[A-Za-z\s]+$/',
             'email' => 'required|email:rfc,dns|unique:patients,email|ends_with:@gmail.com',
             'country_code' => 'required|regex:/^\d{1,3}$/',
-            'phone' => 'required|min:11|numeric',
+            'phone' => 'required|string|min:10|regex:/^[0-9]+$/',
             'document_image' => 'required|image|mimes:jpg|max:2048',
         ], [
             'document_image.max' => 'The document image must not be greater than 2MB.',
