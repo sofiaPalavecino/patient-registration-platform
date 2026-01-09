@@ -2,17 +2,10 @@
 
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-use Laravel\Fortify\Features;
-
-/* Route::get('/', function () {
-    return Inertia::render('welcome', [
-        'canRegister' => Features::enabled(Features::registration()),
-    ]);
-})->name('home'); */
 
 Route::get('/', function () {
     return redirect('/patients');
-});
+})->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
@@ -20,11 +13,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('dashboard');
 
     Route::get('/patients', function () {
-        return Inertia::render('Patients/Index');
+        return Inertia::render('Patients/PatientsUnified');
     })->name('patients.index');
 
     Route::get('/patients/create', function () {
-        return Inertia::render('Patients/Create');
+        return redirect('/patients');
     })->name('patients.create');
 });
 
