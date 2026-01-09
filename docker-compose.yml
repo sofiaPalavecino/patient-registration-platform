@@ -1,0 +1,63 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: laravel_app
+    ports:
+      - "8080:8000"   # Laravel dev server
+      - "5173:5173"   # Vite dev server
+    volumes:
+      - .:/var/www
+      - /var/www/vendor     # Prevent host vendor override
+      - /var/www/node_modules  # Prevent host node_modules override
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+    env_file:
+      - .env
+    depends_on:
+      - db
+    networks:
+      - laravel
+    stdin_open: true
+    tty: true
+
+  db:
+    image: postgres:16
+    container_name: laravel_db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: ${DB_DATABASE}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - laravel
+
+  queue:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: laravel_queue
+    working_dir: /var/www
+    command: ["bash", "/var/www/docker/start-queue.sh"]
+    depends_on:
+      - app
+      - db
+    env_file:
+      - .env
+    volumes:
+      - .:/var/www
+      - /var/www/vendor
+      - /var/www/node_modules
+    networks:
+      - laravel
+
+networks:
+  laravel:
+
+volumes:
+  pgdata:

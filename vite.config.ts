@@ -30,6 +30,13 @@ export default defineConfig({
             },
         },
     },
+    server: {
+        host: '0.0.0.0', // Bind to all interfaces inside the container
+        port: 5173,
+        hmr: {
+            host: 'localhost', // The host name you use in your browser
+        },
+    },
     esbuild: {
         jsx: 'automatic',
     },
