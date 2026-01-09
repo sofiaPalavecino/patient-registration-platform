@@ -2,7 +2,7 @@
 import ErrorField from "./error-field"
 
 interface TextInputProps {
-    label: string;
+    label?: string;
     name: string;
     value: string;
     type?: string;
@@ -11,6 +11,8 @@ interface TextInputProps {
     onChange: (value: string) => void;
     onFocus?: () => void;
     placeholder?: string;
+    showLabel?: boolean;
+    showError?: boolean;
 }
 
 export default function TextInput({
@@ -23,13 +25,17 @@ export default function TextInput({
         onChange,
         onFocus,
         placeholder,
+        showLabel = true,
+        showError = true,
     }: TextInputProps) {
 
     return (
         <>
-            <label htmlFor={name} className="mb-1 block text-sm font-medium">
-                {label}
-            </label>
+            {showLabel && label && (
+                <label htmlFor={name} className="mb-2 block text-sm font-medium">
+                    {label}{required && ' *'}
+                </label>
+            )}
             <input
                 id={`create__patients-${name}`}
                 type={type}
@@ -42,7 +48,8 @@ export default function TextInput({
                 className={`w-full rounded border px-3 py-2 focus:ring-1 focus:ring-blue-500 focus-visible:outline-2
                     ${error ? 'border-red-500' : 'border-gray-300'}`}
             />
-            <ErrorField message={error} />
+            { showError && <ErrorField message={error} /> }
+
         </>
     )
 

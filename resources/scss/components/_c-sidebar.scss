@@ -1,0 +1,26 @@
+@import '../variables';
+
+
+.c-sidebar {
+    background-color: #1d212f;
+
+    .title-container {
+        h1 {
+            @media (max-width: $breakpoint-md) {
+                font-size: 1em;
+            }
+        }
+    }
+    &__navbar {
+        @media (min-width: $breakpoint-md) {
+            a {
+                font-size: 1em;
+            }
+        }
+    }
+
+    &--open {
+        background-color: #1d212f;
+        z-index: 100;
+    }
+}

@@ -1,0 +1,9 @@
+@import '../variables';
+
+.c-file-upload {
+    &__container {
+        &.border-default {
+            border-color: $primary-green;
+        }
+    }
+}

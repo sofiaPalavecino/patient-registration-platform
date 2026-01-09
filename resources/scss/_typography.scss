@@ -1,0 +1,42 @@
+@import 'variables';
+
+.title-container {
+    background-color: $primary-color;
+    padding: .5em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-top-left-radius: 2rem;
+    border-bottom-right-radius: 2rem;
+    color: white;
+    width: 8.5em;
+    font-weight: 600;
+    @media (min-width: $breakpoint-md) {
+        font-size: 1.3em;
+    }
+    h1 {
+        white-space: nowrap;
+    }
+}
+
+.btn {
+    &-primary {
+        background-color: $primary-color;
+        color: white;
+        &:hover {
+            background-color: $secondary-purple;
+            color: $primary-green;
+        }
+    }
+    &-secondary {
+        background-color: $primary-dark-grey;
+        color: white;
+        &:hover {
+            background-color: $secondary-grey;
+        }
+    }
+    &-round {
+        padding: 0.5em 1em;
+        border-radius: 1.5em;
+    }
+}

@@ -1,4 +1,6 @@
 @use 'variables';
 @use 'globals';
+@use 'typography';
 
-
+@use './components/c-sidebar';
+@use './components/c-file-upload';

@@ -11,8 +11,11 @@ export interface BreadcrumbItem {
 }
 
 export interface NavbarItem {
+    id: string;
     title: string;
     href: string;
+    isActive?: boolean;
+    onClick?: () => void;
 }
 
 export interface NavGroup {

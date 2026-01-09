@@ -34,22 +34,15 @@ export default function PatientCard({
 
                 <button
                     onClick={() => setOpen((v) => !v)}
-                    className="transition-transform duration-300"
+                    className="btn btn-round btn-primary transition-transform duration-300"
                     aria-expanded={open}
                 >
-                    <svg
-                        className={`h-5 w-5 transform transition-transform duration-300 ${
-                            open ? 'rotate-180' : ''
-                        }`}
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                    >
-                        <path
-                            fillRule="evenodd"
-                            d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z"
-                            clipRule="evenodd"
-                        />
-                    </svg>
+                    {
+                        open ?
+                        "Close"
+                        :
+                        "View All"
+                    }
                 </button>
             </div>
 

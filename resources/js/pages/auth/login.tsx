@@ -110,7 +110,7 @@ export default function Login({
                             type="submit"
                             disabled={processing}
                             data-test="login-button"
-                            className="mt-4 w-full rounded-md bg-black px-4 py-2 text-sm font-medium text-white transition disabled:opacity-50"
+                            className="btn btn-primary btn-round mt-4 w-full rounded-md bg-black px-4 py-2 text-sm font-medium text-white transition disabled:opacity-50"
                         >
                             {processing ? 'Logging in…' : 'Log in'}
                         </button>

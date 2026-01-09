@@ -1,15 +1,18 @@
-import { useRef, useState } from 'react';
-import { Head, useForm } from '@inertiajs/react';
-import { route } from 'ziggy-js';
+import { useState } from 'react';
+import { Head } from '@inertiajs/react';
 import SuccessMessage from '@/components/modal-success-message';
 import ErrorMessage from '@/components/modal-error-message';
 import Modal from '@/components/modal';
 import ErrorField from '@/components/error-field';
 import TextInput from '@/components/text-input';
+import FileUpload from '@/components/file-upload';
 
-export default function Create() {
-    const fileInputRef = useRef<HTMLInputElement | null>(null);
-    const [isDragging, setIsDragging] = useState(false);
+interface PatientsCreateProps {
+    onCancel: () => void;
+    onSuccess: () => void;
+}
+
+export default function PatientsCreate({ onCancel, onSuccess }: PatientsCreateProps) {
     const [preview, setPreview] = useState<string | null>(null);
     const [modalOpen, setModalOpen] = useState(false);
     const [modalType, setModalType] = useState<'success' | 'error' | null>(null);
@@ -26,38 +29,25 @@ export default function Create() {
         }
     );
 
-    /* const { data, setData, post, processing, errors, clearErrors } = useForm({
-        first_name: '',
-        last_name: '',
-        email: '',
-        country_code: '54',
-        phone: '',
-        document_image: null as File | null,
-    }); */
+    function handleFileSelect(file: File) {
+        setData({ ...data, document_image: file });
 
-    function handleFile(file: File) {
-        if (!['image/jpeg', 'image/jpg'].includes(file.type)) {
-            alert('Only JPG or JPEG images are allowed');
-            return;
+        if (errors.document_image) {
+            setErrors((prev) => ({ ...prev, document_image: undefined }));
         }
 
-        setData({ ...data, document_image: file });
         const reader = new FileReader();
         reader.onload = () => setPreview(reader.result as string);
         reader.readAsDataURL(file);
     }
 
-    function onDrop(e: React.DragEvent<HTMLDivElement>) {
-        e.preventDefault();
-        setIsDragging(false);
+    function handleFileRemove() {
+        setData({ ...data, document_image: null });
+        setPreview(null);
 
-        const file = e.dataTransfer.files[0];
-        if (file) handleFile(file);
-    }
-
-    function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-        const file = e.target.files?.[0];
-        if (file) handleFile(file);
+        if (errors.document_image) {
+            setErrors((prev) => ({ ...prev, document_image: undefined }));
+        }
     }
 
     async function handleSubmit(e: React.FormEvent) {
@@ -71,8 +61,6 @@ export default function Create() {
             Object.entries(data).forEach(([key, value]) => {
                 if (value !== null) formData.append(key, value as any);
             });
-
-            console.log(formData)
 
             const response = await fetch('/api/patients', {
                 method: 'POST',
@@ -90,7 +78,6 @@ export default function Create() {
             }
 
             if (!response.ok) {
-                console.log(resData.errors)
                 setErrors(resData.errors || {});
                 setModalType('error');
             } else {
@@ -100,9 +87,10 @@ export default function Create() {
                     last_name: '',
                     email: '',
                     phone: '',
-                    country_code: '',
+                    country_code: '54',
                     document_image: null,
                 });
+                setPreview(null);
             }
         } catch (err) {
             setModalType('error');
@@ -116,7 +104,6 @@ export default function Create() {
     function handleChange(field: string, value: string | File) {
         setData({ ...data, [field]: value });
 
-        // Clear the error for this field when typing
         if (errors[field]) {
             setErrors((prev) => ({ ...prev, [field]: undefined }));
         }
@@ -125,12 +112,17 @@ export default function Create() {
 
     return (
         <>
-            <Head title="Create Patient" />
+            <Head title="Add Patient" />
 
             <div className="mx-auto max-w-xl p-6">
-                <h1 className="mb-6 text-2xl font-semibold">
-                    Register new patient
-                </h1>
+                <div className="mb-4">
+                    <button
+                        onClick={onCancel}
+                        className="text-gray-600 hover:text-gray-800 text-sm"
+                    >
+                        ← Back to patients
+                    </button>
+                </div>
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div>
@@ -161,106 +153,73 @@ export default function Create() {
                         <TextInput
                             label="Email"
                             name="email"
+                            type="email"
                             value={data.email}
                             error={errors.email}
                             onChange={(value) => handleChange('email', value)}
                             onFocus={() => setErrors((prev) => ({ ...prev, email: undefined }))}
-                            placeholder="Doe"
+                            placeholder="john@gmail.com"
                         />
                     </div>
 
-                    <div className="">
+                    <div>
+                        <label className="mb-2 block text-sm font-medium">
+                            Phone number *
+                        </label>
                         <div className="flex gap-2">
                             <select
                                 name="country_code"
                                 value={data.country_code}
                                 onChange={(e) => handleChange('country_code', e.target.value)}
                                 onFocus={() => setErrors((prev) => ({ ...prev, country_code: undefined }))}
-                                className={`rounded border px-2 py-2
-                                    ${errors.phone ? 'border-red-500' : 'border-gray-300'}`}
+                                className={`rounded border px-3 py-2 focus:ring-1 focus:ring-blue-500 focus-visible:outline-2
+                                    ${errors.country_code ? 'border-red-500' : 'border-gray-300'}`}
                             >
+                                <option value="54">🇦🇷 +54</option>
                                 <option value="1">🇺🇸 +1</option>
                                 <option value="34">🇪🇸 +34</option>
                                 <option value="44">🇬🇧 +44</option>
                                 <option value="49">🇩🇪 +49</option>
-                                <option value="sdasd">🇦🇷 +54</option>
                                 <option value="55">🇧🇷 +55</option>
                                 <option value="57">🇨🇴 +57</option>
                             </select>
 
-                            <input
-                                type="tel"
+                            <TextInput
                                 name="phone"
+                                type="tel"
                                 value={data.phone}
-                                onChange={(e) => handleChange('phone', e.target.value)}
+                                error={errors.phone}
+                                onChange={(value) => handleChange('phone', value)}
                                 onFocus={() => setErrors((prev) => ({ ...prev, phone: undefined }))}
                                 placeholder="11 2345 6789"
-                                className={`w-full rounded border px-3 py-2 focus:ring-1 focus:ring-blue-500 focus-visible:outline-2
-                                    ${errors.phone ? 'border-red-500' : 'border-gray-300'}`}
+                                showLabel={false}
+                                showError={false}
+                                required={true}
                             />
                         </div>
-                        <ErrorField message={errors.country_code} />
                         <ErrorField message={errors.phone} />
+                        <ErrorField message={errors.country_code} />
                     </div>
 
-                    <div>
-                        <label className="mb-2 block text-sm font-medium">
-                            Document image *
-                        </label>
-
-                        <div
-                            onDragOver={(e) => {
-                                e.preventDefault();
-                                setIsDragging(true);
-                            }}
-                            onDragLeave={() => setIsDragging(false)}
-                            onDrop={onDrop}
-                            className={`flex cursor-pointer flex-col items-center justify-center rounded border-2 border-dashed p-6 text-center ${
-                                isDragging ? 'border-black bg-gray-50' : 'border-gray-300'
-                            }`}
-                            onClick={() => fileInputRef.current?.click()}
-                        >
-                            {preview ? (
-                                <img
-                                    src={preview}
-                                    alt="Preview"
-                                    className="h-32 w-32 rounded object-cover"
-                                />
-                            ) : (
-                                <>
-                                    <p className="text-sm">
-                                        Drag and drop an image here
-                                    </p>
-                                    <p className="mt-1 text-sm text-gray-500">
-                                        or{' '}
-                                        <span className="underline">
-                                            choose a file
-                                        </span>
-                                    </p>
-                                    <p className="mt-1 text-xs text-gray-400">
-                                        JPG or JPEG only
-                                    </p>
-                                </>
-                            )}
-                        </div>
-
-                        <input
-                            ref={fileInputRef}
-                            type="file"
-                            accept="image/jpg,image/jpeg"
-                            className="hidden"
-                            name="document_image"
-                            onChange={onFileChange}
-                        />
-                        <ErrorField message={errors.document_image} />
-                    </div>
+                    <FileUpload
+                        label="Document image"
+                        name="document_image"
+                        onFileSelect={handleFileSelect}
+                        onRemove={handleFileRemove}
+                        preview={preview}
+                        error={errors.document_image}
+                        accept="image/jpg,image/jpeg"
+                        acceptedTypes={['image/jpeg', 'image/jpg']}
+                        maxSizeInMB={2}
+                        required={true}
+                    />
 
                     <button
                         type="submit"
-                        className="w-full rounded bg-black px-4 py-2 text-white"
+                        className="px-4 py-2 text-white btn btn-primary btn-round"
                         disabled={processing}
                     >
-                        Create patient
+                        Add patient
                     </button>
                 </form>
             </div>
@@ -270,7 +229,10 @@ export default function Create() {
                 onClose={() => setModalOpen(false)}
             >
                 {modalType === 'success' && (
-                    <SuccessMessage onClose={() => setModalOpen(false)} />
+                    <SuccessMessage
+                        onClose={() => setModalOpen(false)}
+                        onBackToList={onSuccess}
+                    />
                 )}
 
                 {modalType === 'error' && (
@@ -280,3 +242,4 @@ export default function Create() {
         </>
     );
 }
+
