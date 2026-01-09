@@ -1,0 +1,8 @@
+@import 'variables';
+
+input {
+    &:focus-visible {
+        outline-offset: 4px !important;
+        outline-color: $form__input__outline;
+    }
+}
