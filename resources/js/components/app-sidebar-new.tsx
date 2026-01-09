@@ -1,5 +1,6 @@
 import { ReactNode, useState } from "react";
 import AppSidebarNav from "./app-sidebar-nav";
+import UserProfileSidebar from "./user-profile-sidebar";
 import { NavbarItem } from "@/types";
 
 interface AppSidebarProps {
@@ -53,20 +54,33 @@ export default function AppSidebar({ children, title, navElements }: AppSidebarP
                     </button>
                 </div>
 
-                <div className="hidden md:block">
+                <div className="hidden md:block md:flex-1 md:flex md:flex-col">
                     <div className="title-container mb-5">
                         <h1>{title}</h1>
                     </div>
-                    <AppSidebarNav elements={navElements || []} />
+
+                    <div className="flex-1">
+                        <AppSidebarNav elements={navElements || []} />
+                    </div>
+
+                    <div className="mt-auto pt-4">
+                        <UserProfileSidebar />
+                    </div>
                 </div>
 
                 {isOpen && (
                     <div className="c-sidebar--open absolute top-16 left-0 h-full md:hidden">
-                        <div className="p-4">
-                            <AppSidebarNav
-                                elements={navElements || []}
-                                onNavigate={() => setIsOpen(false)}
-                            />
+                        <div className="p-4 flex flex-col h-full">
+                            <div className="flex-1">
+                                <AppSidebarNav
+                                    elements={navElements || []}
+                                    onNavigate={() => setIsOpen(false)}
+                                />
+                            </div>
+
+                            <div className="mt-auto pt-4">
+                                <UserProfileSidebar />
+                            </div>
                         </div>
                     </div>
                 )}
