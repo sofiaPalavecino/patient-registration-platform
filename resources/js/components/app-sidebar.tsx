@@ -1,69 +1,92 @@
-import { NavFooter } from '@/components/nav-footer';
-import { NavMain } from '@/components/nav-main';
-import { NavUser } from '@/components/nav-user';
-import {
-    Sidebar,
-    SidebarContent,
-    SidebarFooter,
-    SidebarHeader,
-    SidebarMenu,
-    SidebarMenuButton,
-    SidebarMenuItem,
-} from '@/components/ui/sidebar';
-import { dashboard } from '@/routes';
-import { type NavItem } from '@/types';
-import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid } from 'lucide-react';
-import AppLogo from './app-logo';
+import { ReactNode, useState } from "react";
+import AppSidebarNav from "./app-sidebar-nav";
+import UserProfileSidebar from "./user-profile-sidebar";
+import { NavbarItem } from "@/types";
 
-const mainNavItems: NavItem[] = [
-    {
-        title: 'Dashboard',
-        href: dashboard(),
-        icon: LayoutGrid,
-    },
-];
+interface AppSidebarProps {
+    children?: ReactNode;
+    title: string
+    navElements?: NavbarItem[];
+}
 
-const footerNavItems: NavItem[] = [
-    {
-        title: 'Repository',
-        href: 'https://github.com/laravel/react-starter-kit',
-        icon: Folder,
-    },
-    {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#react',
-        icon: BookOpen,
-    },
-    {
-        title: 'Create Patient',
-        href: '/patients/create'
-    }
-];
+export default function AppSidebar({ children, title, navElements }: AppSidebarProps) {
+    const [isOpen, setIsOpen] = useState(false);
 
-export function AppSidebar() {
     return (
-        <Sidebar collapsible="icon" variant="inset">
-            <SidebarHeader>
-                <SidebarMenu>
-                    <SidebarMenuItem>
-                        <SidebarMenuButton size="lg" asChild>
-                            <Link href={dashboard()} prefetch>
-                                <AppLogo />
-                            </Link>
-                        </SidebarMenuButton>
-                    </SidebarMenuItem>
-                </SidebarMenu>
-            </SidebarHeader>
+        <aside
+            className="
+                c-sidebar w-full h-16
+                md:w-64 md:h-auto
+                flex-shrink-0
+            "
+        >
+            <div
+                className="
+                    h-full
+                    flex items-center justify-between
+                    md:flex-col md:items-stretch md:justify-start
+                    p-4 gap-4
+                "
+            >
+                <div className="flex w-full items-center justify-between md:hidden">
+                    <div className="title-container">
+                        <h1>{title}</h1>
+                    </div>
 
-            <SidebarContent>
-                <NavMain items={mainNavItems} />
-            </SidebarContent>
+                    <button
+                        onClick={() => setIsOpen((prev) => !prev)}
+                        aria-label="Toggle menu"
+                        className="btn btn-secondary rounded-lg p-2"
+                    >
+                        <svg
+                            className="h-6 w-6"
+                            fill="none"
+                            stroke="white"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M4 6h16M4 12h16M4 18h16"
+                            />
+                        </svg>
+                    </button>
+                </div>
 
-            <SidebarFooter>
-                <NavFooter items={footerNavItems} className="mt-auto" />
-                <NavUser />
-            </SidebarFooter>
-        </Sidebar>
+                <div className="hidden md:block md:flex-1 md:flex md:flex-col">
+                    <div className="title-container mb-5">
+                        <h1>{title}</h1>
+                    </div>
+
+                    <div className="flex-1">
+                        <AppSidebarNav elements={navElements || []} />
+                    </div>
+
+                    <div className="mt-auto pt-4">
+                        <UserProfileSidebar />
+                    </div>
+                </div>
+
+                {isOpen && (
+                    <div className="c-sidebar--open absolute top-16 left-0 h-full md:hidden">
+                        <div className="p-4 flex flex-col h-full">
+                            <div className="flex-1">
+                                <AppSidebarNav
+                                    elements={navElements || []}
+                                    onNavigate={() => setIsOpen(false)}
+                                />
+                            </div>
+
+                            <div className="mt-auto pt-4">
+                                <UserProfileSidebar />
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {children}
+            </div>
+        </aside>
     );
 }

@@ -8,7 +8,6 @@ export default function UserProfileSidebar() {
     const dropdownRef = useRef<HTMLDivElement>(null);
     const { auth } = usePage<SharedData>().props;
 
-    // Close dropdown when clicking outside
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {

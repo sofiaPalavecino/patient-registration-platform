@@ -1,7 +1,5 @@
 import { ReactNode } from 'react';
-import AppSidebar from '@/components/app-sidebar-new';
-import AppSidebarHeader from '@/components/app-sidebar-header-new';
-import { NavbarItem } from '@/types';
+import AppSidebar from '@/components/app-sidebar';
 
 interface AppLayoutProps {
     children: ReactNode;
